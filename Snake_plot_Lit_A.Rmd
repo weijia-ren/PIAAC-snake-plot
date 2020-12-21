@@ -1,0 +1,95 @@
+---
+title: "Snake/Ranking plot showcase"
+author: "Weijia Ren"
+date: "12/18/2020"
+output: 
+  html_document:
+    theme: united 
+    higglighte: tango
+    toc:  true
+    toc_float:  true
+    number_sections: true
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction 
+
+This project is a showcase of a plot which can visualize the order of estimates from a group of observations/cases, including the corresponding confidence intervals. 
+
+The order could be ascending or descending. 
+
+The non-overlapping confidence intervals could indicate significant differences between the two observations/cases. 
+
+# Data
+
+The data used for this example is publicly available and downloaded from the [PIAAC Skills Map](https://nces.ed.gov/surveys/piaac/skillsmap/).
+
+# Snake/Ranking plot 
+
+This is an example of the snake/ranking plot of the states' average literacy scale scores for all the U.S. states.
+```{r echo=FALSE, fig.width=8.5, fig.height=11 }
+
+.libPaths(c(.libPaths(),"c:/3.5"))
+library(ggplot2)
+library(readxl)
+library(plyr)
+
+dir<- "C:/Users/ren_w/Desktop/R code/Snake_Plot/PIAAC-snake-plot/SAE_website_dataset.xlsx"
+piaac_cty <- read_excel(dir,sheet="County")
+piaac_st <- read_excel(dir,sheet="State")
+piaac_n <- read_excel(dir,sheet="Nation")
+
+# create the order variable 
+piaac_st$order <- 0
+piaac_st$name <- piaac_st$State
+piaac_n$order <- 1
+piaac_n$name <- piaac_n$Country
+
+piaac_st_n <- rbind.fill(piaac_st,piaac_n)
+
+piaac_st_n <- piaac_st_n[order(piaac_st_n$order,piaac_st_n$Lit_A),]
+piaac_st_n$id <- seq_len(nrow(piaac_st_n))
+piaac_st_n$id <- as.factor(piaac_st_n$id)
+piaac_st_n$order <- as.factor(piaac_st_n$order)
+
+#pdf(("C:/Users/ren_w/Desktop/R code/Snake_Plot/PIAAC-snake-plot/PIAAC_Lit_A.pdf"),width=8.5, height=11) 
+ggplot(piaac_st_n) + 
+          geom_errorbarh(aes(y=id,xmax = Lit_A_CI_U, xmin = Lit_A_CI_L, height = 0.1,color=order),size=2)+
+          geom_point(aes(x=Lit_A,y=id,color=order,fill=order),size=2, shape=22)+
+          labs(x="Average literacy scale score",y="", size=8, title="Average Literacy Scale Scores of U.S. States: 2012-2017",caption="cap")+
+          theme_bw()+
+          scale_x_continuous(limits=c(150,325),expand=c(0,0),breaks=c(150,175,200,225,250,275,300,325))+
+          scale_y_discrete(labels= piaac_st_n[["name"]])+
+          scale_fill_manual(name=" ",values=c("#deebf7","#ffa500"),labels=c("State Indirect Estimates","National Indirect Estimate"))+
+          scale_color_manual(name=" ",values=c("#08669b","#c74219"),labels=c("State Credible Intervals","National Credible Interval"))+
+          theme(plot.title = element_text(size =12,hjust=0,vjust = 5),
+                plot.margin=unit(c(1.5,3,1,1),"cm"),
+                legend.position=c(0.85,0.055),
+                plot.title.position = "plot",
+                plot.caption.position = "plot",
+                legend.text = element_text(size = 7),
+                legend.key.size = unit(0.5, "cm"),
+                #legend.key = element_rect(size = 5),
+                legend.background=element_rect(fill="transparent"),
+                #legend.background=element_rect(colour = 'black',fill = 'white', linetype='solid'),
+                legend.spacing.y = unit(-0.4, "cm"),
+                plot.caption = element_text(vjust= -7,hjust = 0,size=8),
+                axis.text.y = element_text(hjust = 0, vjust=0.3,size=8),
+                axis.text.x = element_text(size=8),
+                axis.title.x = element_text(size =10,vjust = -2),
+                axis.title.y = element_blank())+
+          guides(fill = guide_legend(order=1),color = guide_legend(order=2))
+#dev.off() 
+
+```
+
+
+
+
+
+
+
