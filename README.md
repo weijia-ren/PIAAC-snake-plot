@@ -1,4 +1,4 @@
-# Snake/Ranking Plot
+
 
 ## Introduction 
 
@@ -15,5 +15,4 @@ The data used for this example is publicly available and downloaded from the [PI
 ## Snake/Ranking plot 
 
 This is an example of the snake/ranking plot of the states' average literacy scale scores for all the U.S. states.
-
 ![](PIAACplot.png)
